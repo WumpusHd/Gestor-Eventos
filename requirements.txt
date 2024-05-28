@@ -2,3 +2,4 @@ fpdf
 pandas
 plotly
 streamlit
+streamlit-option-menu
