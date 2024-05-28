@@ -34,7 +34,6 @@ def agregar_evento(st, controlador):
 
     # Crea un objeto Evento para almacenar la información del formulario
     info_evento = Evento()
-    artistas = Artista()
 
     # Define los campos del formulario para recoger la información del evento
     with col1:
@@ -58,7 +57,7 @@ def agregar_evento(st, controlador):
         # Dependiendo del tipo de evento, se recogen diferentes datos y se crean diferentes objetos
         if info_evento.tipo_evento == 'Bar':
             # Código para manejar la creación de un EventoBar
-            # Inicializamos una lista vacía para almacenar las cortesías
+            # Inicializamos una lista vacía para almacenar las cortesias
             lista_cortesias = []
             i = 0
 
@@ -67,7 +66,7 @@ def agregar_evento(st, controlador):
                 # Generamos un número aleatorio entre 0 y el aforo total del evento
                 num_aleatorio = random.randint(0, info_evento.aforo_total)
 
-                # Si el número aleatorio no está ya en la lista de cortesías
+                # Si el número aleatorio no está ya en la lista de cortesias
                 if num_aleatorio not in lista_cortesias:
                     lista_cortesias.append(num_aleatorio)
                     i += 1
@@ -78,7 +77,7 @@ def agregar_evento(st, controlador):
                                    info_evento.hora_show, info_evento.lugar, info_evento.direccion, info_evento.ciudad)
             evento_bar.aforo_total = info_evento.aforo_total
 
-            # Asignamos la lista de cortesías al atributo lista_cortesias del objeto evento_bar
+            # Asignamos la lista de cortesias al atributo lista_cortesias del objeto evento_bar
             evento_bar.lista_cortesias = lista_cortesias
         elif info_evento.tipo_evento == 'Teatro':
             # Código para manejar la creación de un EventoTeatro
@@ -86,7 +85,7 @@ def agregar_evento(st, controlador):
             with col10:
                 costo_alquiler = st.number_input("Alquiler")
 
-            # Se inicializa una lista vacía para las cortesías
+            # Se inicializa una lista vacía para las cortesias
             lista_cortesias = []
             i = 0
 
@@ -95,7 +94,7 @@ def agregar_evento(st, controlador):
                 # Se genera un número aleatorio entre 0 y el aforo total del evento
                 num_aleatorio = random.randint(0, info_evento.aforo_total)
 
-                # Si el número aleatorio no está ya en la lista de cortesías
+                # Si el número aleatorio no está ya en la lista de cortesias
                 if num_aleatorio not in lista_cortesias:
                     lista_cortesias.append(num_aleatorio)
                     i += 1
@@ -108,7 +107,7 @@ def agregar_evento(st, controlador):
                                          costo_alquiler)
             evento_teatro.aforo_total = info_evento.aforo_total
 
-            # Se asigna la lista de cortesías al atributo lista_cortesias del objeto evento_teatro
+            # Se asigna la lista de cortesias al atributo lista_cortesias del objeto evento_teatro
             evento_teatro.lista_cortesias = lista_cortesias
         elif info_evento.tipo_evento == 'Filantropico':
 
@@ -124,7 +123,9 @@ def agregar_evento(st, controlador):
     enviado_btn = st.button("Crear Evento")
 
     # Si se presiona el botón y todos los campos están llenos
-    if enviado_btn and info_evento.nombre != "" and info_evento.fecha != 0 and info_evento.hora_apertura != 0 and info_evento.hora_show != 0 and info_evento.lugar != "" and info_evento.direccion != "" and info_evento.ciudad != "" and info_evento.aforo_total != 0:
+    if (enviado_btn and info_evento.nombre != "" and info_evento.fecha != 0 and info_evento.hora_apertura != 0 and
+            info_evento.hora_show != 0 and info_evento.lugar != "" and
+            info_evento.direccion != "" and info_evento.ciudad != "" and info_evento.aforo_total != 0):
         # Dependiendo del tipo de evento, se agrega el evento correspondiente al controlador
         if info_evento.tipo_evento == 'Bar':
             controlador.agregar_evento(evento_bar)
@@ -154,15 +155,16 @@ def gestionar_evento(st, controlador):
 
     # Si el evento existe
     if evento is not None:
+        # Si el evento es filantropico
         if evento.tipo_evento == 'Filantropico':
             """Selecciona la opción a gestionar"""
             opcion_evento = st.selectbox("Eliga la opción a gestionar",
                                          ['Añadir Patrocinadores', 'Eliminar evento',
                                           'Estado del Evento'])
+        # En caso de ser bar o teatro, si fue realizado no se pueden hacer cambios
+        # Si fue cancelado aún se puede modificar el estado
         elif evento.estado == 'Realizado':
             st.warning("El evento ya fue realizado")
-            opcion_evento = st.selectbox("Eliga la opción a gestionar",
-                                         ['Estado del Evento'])
 
         elif evento.estado == 'Cancelado':
             st.warning("El evento fue cancelado")
@@ -176,26 +178,40 @@ def gestionar_evento(st, controlador):
 
         # Si la opción es 'Modificar fase de venta y precio boleta'
         if opcion_evento == 'Modificar fase de venta y precio boleta':
+            # Crea un nuevo objeto Artista
             artista = Artista()
 
+            # Solicita al usuario que ingrese el nombre del artista
             artista.nombre = st.text_input("Nombre de artista")
 
+            # Crea un botón para añadir el artista
             boton_artistas = st.button("Añadir artista")
+            # Si el botón es presionado
             if boton_artistas:
+                # Añade el evento a la lista de eventos ingresados del artista
                 artista.eventos_ingresados.append(evento)
+                # Si no hay artistas en la lista de artistas del controlador
                 if not controlador.lista_artistas:
+                    # Añade el artista a la lista de artistas del controlador
                     controlador.agregar_artistas(artista)
                 else:
+                    # Inicializa una bandera en 0
                     flag = 0
+                    # Para cada artista en la lista de artistas del controlador
                     for artistas in controlador.lista_artistas:
+                        # Si el nombre del artista coincide con el nombre del artista ingresado
                         if artistas.nombre == artista.nombre:
+                            # Añade el evento a la lista de eventos ingresados del artista
                             artistas.eventos_ingresados.append(evento)
+                            # Cambia la bandera a 1
                             flag = 1
+                    # Si la bandera sigue siendo 0 (es decir, no se encontró un artista con el mismo nombre)
                     if flag == 0:
+                        # Añade el artista a la lista de artistas del controlador
                         controlador.agregar_artistas(artista)
 
+                # Añade el artista a la lista de artistas del evento
                 evento.artistas.append(artista)
-
             # Selecciona la fase de venta del evento
             fase_venta = st.selectbox("Fase de venta", ['Preventa', 'Venta'])
             # Si la fase de venta es 'Preventa'
@@ -252,8 +268,6 @@ def gestionar_evento(st, controlador):
             boton = st.button("Confirmar")
             if boton:
                 evento.estado = modificar_estado
-
-    # Si el evento no existe, muestra un mensaje de error
     else:
         st.write("No se encontró el evento")
 
@@ -277,6 +291,7 @@ def vender_boleta(st, controlador):
         evento = next((evento for evento in controlador.lista_eventos if evento.nombre == cliente.nombre_evento), None)
 
         # Si no hay eventos registrados, muestra un mensaje de advertencia
+        # Si hay eventos registrados, se revisa el estado actual del evento
         if not controlador.lista_eventos:
             st.warning("No hay eventos registrados")
 
@@ -321,20 +336,20 @@ def vender_boleta(st, controlador):
                         st.write("Cantidad de boletas disponibles: ", evento.aforo_total - len(evento.boletas_vendidas))
                     else:
                         st.write("Seleccione un evento")
-                # En la columna 6, determina si la boleta es de cortesía
+                # En la columna 6, determina si la boleta es de cortesia
                 with col6:
                     # Si el evento seleccionado es de tipo "Filantropico"
                     if cliente.nombre_evento == "Filantropico":
-                        cliente.cortesía = True
+                        cliente.cortesia = True
                     else:
-                        # Si el número de boletas vendidas está en la lista de cortesías del evento
+                        # Si el número de boletas vendidas está en la lista de cortesias del evento
                         if len(evento.boletas_vendidas) in evento.lista_cortesias:
-                            cliente.cortesía = True
+                            cliente.cortesia = True
 
-                        # Si la boleta es de cortesía
-                        if cliente.cortesía:
+                        # Si la boleta es de cortesia
+                        if cliente.cortesia:
                             cliente.precio = 0
-                            st.write("La boleta es de cortesía")
+                            st.write("La boleta es de cortesia")
 
                 boton_confirmacion = st.button("Vender Boleta")
 
@@ -348,7 +363,7 @@ def vender_boleta(st, controlador):
                     st.write("Boleta vendida exitosamente")
                     # Se crea un objeto Boleta con los datos recogidos
                     boleta = Boleta(cliente.nombre_evento, cliente.comprador, cliente.fuente, cliente.metodo_pago,
-                                    evento.fase_venta, cliente.precio, cliente.cortesía)
+                                    evento.fase_venta, cliente.precio, cliente.cortesia)
                     # Si el evento es de tipo 'Bar', se calculan los ingresos para el bar y el artista
                     if evento.tipo_evento == 'Bar':
                         evento.ingresos_bar += cliente.precio * 0.2
@@ -384,8 +399,8 @@ def vender_boleta(st, controlador):
                     pdf.cell(200, 10, txt=f"Fecha: {cliente.fecha_compra}", ln=True, align='C')
                     pdf.cell(200, 10, txt=f"Lugar: {cliente.lugar}", ln=True, align='C')
                     pdf.cell(200, 10, txt=f"Dirección: {cliente.direccion}", ln=True, align='C')
-                    # Si la boleta es de cortesía, se añade una celda indicándolo
-                    if cliente.cortesía:
+                    # Si la boleta es de cortesia, se añade una celda indicándolo
+                    if cliente.cortesia:
                         pdf.cell(200, 10, txt=f"La Boleta es de Cortesia", ln=True, align='C')
                     # Si no, se añade una celda con el precio de la boleta
                     else:
@@ -429,6 +444,7 @@ def generar_reportes(st, controlador):
                 evento = next((evento for evento in controlador.lista_eventos if evento.nombre == opcion), None)
 
                 # Si no hay boletas vendidas para el evento, muestra un mensaje de advertencia
+                # Si hay boletas vendidas, se revisa el estado actual del evento
                 if not evento.boletas_vendidas:
                     st.warning("No hay boletas vendidas")
                 elif evento.estado == 'Realizado':
@@ -558,7 +574,7 @@ def generar_reportes(st, controlador):
                         compradores['Comprador'].append(boleta.comprador)
                         compradores['Fuente'].append(boleta.fuente)
                         compradores['Fase de Venta'].append(boleta.fase_venta)
-                        compradores['Precio'].append(boleta.precio if not boleta.cortesía else 0)
+                        compradores['Precio'].append(boleta.precio if not boleta.cortesia else 0)
 
                     df_compradores = pd.DataFrame(compradores)
 
@@ -618,37 +634,51 @@ def generar_reportes(st, controlador):
 def ingresar_evento(st, controlador):
     st.title("Ingresar Evento")
 
+    # Si no hay eventos registrados, muestra una advertencia
     if not controlador.lista_eventos:
         st.warning("No hay eventos registrados")
     else:
+        # Barra desplegable para seleccionar el evento
         opcion = st.selectbox("Eliga el evento a ingresar",
                               [evento.nombre for evento in controlador.lista_eventos])
+        # Busca el evento seleccionado en la lista de eventos del controlador
         evento = next((evento for evento in controlador.lista_eventos if evento.nombre == opcion), None)
 
+        # Si no hay boletas vendidas para el evento, muestra una advertencia
         if not evento.boletas_vendidas:
             st.warning("No hay boletas vendidas")
+        # Si el evento ya fue realizado, muestra una advertencia
         elif evento.estado == 'Realizado':
             st.warning("El evento ya fue realizado")
+        # Si el evento fue cancelado, muestra una advertencia
         elif evento.estado == 'Cancelado':
             st.warning("El evento fue cancelado")
         else:
+            # Selecciona el nombre del comprador desde un desplegable
             nombre = st.selectbox("Nombre del comprador", [boleta.comprador for boleta in evento.boletas_vendidas])
 
+            # Busca la boleta del comprador en la lista de boletas vendidas del evento
             boleta = next((boleta for boleta in evento.boletas_vendidas if boleta.comprador == nombre), None)
+            # Crea un botón para confirmar el ingreso
             boton_confirmar = st.button("Confirmar Ingreso")
 
+            # Si el comprador ya ingresó al evento, muestra un mensaje
             if boleta.confirmado:
                 st.write("El comprador ya ingresó al evento")
+            # Si se presiona el botón de confirmación, confirma el ingreso y muestra un mensaje
             elif boton_confirmar:
                 boleta.confirmado = True
                 st.write("Ingreso confirmado")
+            # Crea un diccionario para almacenar la asistencia
             asistencia = {
                 'Comprador': [],
                 'Confirmado': []
             }
+            # Para cada boleta vendida en el evento, agrega el comprador y el estado de confirmación al diccionario
             for boleta in evento.boletas_vendidas:
                 asistencia['Comprador'].append(boleta.comprador)
                 asistencia['Confirmado'].append(boleta.confirmado)
+            # Crea un DataFrame de pandas con la asistencia y lo muestra
             df_asistencia = pd.DataFrame(asistencia, columns=["Comprador", "Confirmado"])
             st.write(df_asistencia)
 
